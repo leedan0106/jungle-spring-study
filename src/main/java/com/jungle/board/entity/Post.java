@@ -7,7 +7,7 @@ import lombok.NoArgsConstructor;
 import jakarta.persistence.*;
 
 @Getter
-@Entity
+@Entity(name = "posts")
 @NoArgsConstructor
 public class Post extends Timestamped {
     @Id
