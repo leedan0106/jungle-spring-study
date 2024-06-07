@@ -1,7 +1,9 @@
 package com.jungle.board.service;
 
+import com.jungle.board.dto.PostDeleteRequestDto;
 import com.jungle.board.dto.PostRequestDto;
 import com.jungle.board.dto.PostResponseDto;
+import com.jungle.board.dto.ResponseDto;
 import com.jungle.board.entity.Post;
 import com.jungle.board.repository.PostRepository;
 import lombok.RequiredArgsConstructor;
@@ -18,10 +20,10 @@ public class PostService {
     private final PostRepository postRepository;
 
     @Transactional
-    public Post createPost(PostRequestDto requestDto) {
+    public PostResponseDto createPost(PostRequestDto requestDto) {
         Post post = new Post(requestDto);
         postRepository.save(post);
-        return post;
+        return new PostResponseDto(post);
     }
 
     @Transactional(readOnly = true)
@@ -34,7 +36,7 @@ public class PostService {
     @Transactional
     public PostResponseDto getPost(Long id) {
         Post post = postRepository.findById(id).orElseThrow(
-                () -> new IllegalArgumentException("아이디가 존재하지 않습니다.")
+                () -> new IllegalArgumentException("게시물이 존재하지 않습니다.")
         );
         return new PostResponseDto(post);
     }
@@ -42,19 +44,33 @@ public class PostService {
     @Transactional
     public PostResponseDto updatePost(Long id, PostRequestDto requestDto) {
         Post post = postRepository.findById(id).orElseThrow(
-                () -> new IllegalArgumentException("아이디가 존재하지 않습니다.")
+                () -> new IllegalArgumentException("게시물이 존재하지 않습니다.")
         );
 
-        // 패스워드 일치 여부 확인..
+        // 패스워드 일치 해야 수정 가능
+        String password = requestDto.getPassword();
+        if(!post.getPassword().equals(password)) {
+            throw new IllegalArgumentException("비밀번호가 일치하지 않습니다.");
+        }
+
         post.update(requestDto);
         return new PostResponseDto(post);
     }
 
     @Transactional
-    public Long deleteMemo(Long id) {
+    public ResponseDto deletePost(Long id, PostDeleteRequestDto requestDto) { // password를 받아와야 한다. dto가 또 필요함.
+        Post post = postRepository.findById(id).orElseThrow(
+                () -> new IllegalArgumentException("게시물이 존재하지 않습니다.")
+        );
+
+        // password 일치해야 삭제 가능
+        String password = requestDto.getPassword();
+        if(!post.getPassword().equals(password)) {
+            throw new IllegalArgumentException("비밀번호가 일치하지 않습니다.");
+        }
+
         postRepository.deleteById(id);
-        // response 따로 만들어서 return 필요.
         // 에러 처리도 필요.
-        return id;
+        return new ResponseDto("Success", 200);
     }
 }

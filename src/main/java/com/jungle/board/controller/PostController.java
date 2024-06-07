@@ -1,7 +1,9 @@
 package com.jungle.board.controller;
 
+import com.jungle.board.dto.PostDeleteRequestDto;
 import com.jungle.board.dto.PostRequestDto;
 import com.jungle.board.dto.PostResponseDto;
+import com.jungle.board.dto.ResponseDto;
 import com.jungle.board.entity.Post;
 import com.jungle.board.service.PostService;
 import lombok.RequiredArgsConstructor;
@@ -15,7 +17,7 @@ public class PostController {
     private final PostService postService;
 
     @PostMapping("/posts")
-    public Post createPost(@RequestBody PostRequestDto requestDto) {
+    public PostResponseDto createPost(@RequestBody PostRequestDto requestDto) {
         return postService.createPost(requestDto);
     }
 
@@ -35,7 +37,7 @@ public class PostController {
     }
 
     @DeleteMapping("/posts/{id}")
-    public Long deletePost(@PathVariable Long id) {
-        return postService.deleteMemo(id);
+    public ResponseDto deletePost(@PathVariable Long id, @RequestBody PostDeleteRequestDto requestDto) {
+        return postService.deletePost(id, requestDto);
     }
 }
