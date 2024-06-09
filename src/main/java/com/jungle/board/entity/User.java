@@ -20,6 +20,10 @@ public class User extends Timestamped{
     @Column(nullable = false)
     private String password;
 
+    public User(String username, String password) {
+        this.username = username;
+        this.password = password;
+    }
     public User(UserRequestDto requestDto) {
         this.username = requestDto.getUsername();
         this.password = requestDto.getPassword();
