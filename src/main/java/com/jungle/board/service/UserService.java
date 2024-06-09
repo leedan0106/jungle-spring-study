@@ -1,12 +1,15 @@
 package com.jungle.board.service;
 
+import com.jungle.board.config.AuthConfig;
 import com.jungle.board.dto.ResponseDto;
 import com.jungle.board.dto.UserRequestDto;
 import com.jungle.board.jwt.JwtUtil;
 import com.jungle.board.repository.UserRepository;
 import com.jungle.board.entity.User;
+import com.jungle.board.config.AuthConfig.*;
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -18,6 +21,7 @@ public class UserService {
 
     private final UserRepository userRepository;
     private final JwtUtil jwtUtil;
+    private final PasswordEncoder passwordEncoder;
 
     @Transactional
     public ResponseDto signin(UserRequestDto requestDto) {
@@ -27,7 +31,9 @@ public class UserService {
             throw new IllegalArgumentException("이미 존재하는 Username입니다.");
         }
 
-        User user = new User(requestDto);
+        String password = passwordEncoder.encode(requestDto.getPassword());
+        User user = new User(requestDto.getUsername(), password);
+
         userRepository.save(user);
         return new ResponseDto("Success", 200);
     }
@@ -40,9 +46,14 @@ public class UserService {
         );
 
         // password 비교
-        if(!user.getPassword().equals(requestDto.getPassword())) {
+        if(!passwordEncoder.matches(requestDto.getPassword(), user.getPassword())) {
             throw new IllegalArgumentException("비밀번호가 일치하지 않습니다.");
         }
+
+//        if(!user.getPassword().equals(requestDto.getPassword())) {
+//            throw new IllegalArgumentException("비밀번호가 일치하지 않습니다.");
+//        }
+
         // 로그인 성공시 성공한 유저 정보와 JWT 토큰 발급.
         // 발급한 토큰을 Header에 추가
         response.addHeader(JwtUtil.AUTHORIZATION_HEADER, jwtUtil.createToken(user.getUsername()));
