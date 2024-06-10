@@ -1,11 +1,10 @@
 package com.jungle.board.entity;
 
-import com.jungle.board.dto.PostRequestDto;
-import com.jungle.board.dto.UserRequestDto;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 
 import jakarta.persistence.*;
+
 @Getter
 @Entity(name = "users")
 @NoArgsConstructor
@@ -20,13 +19,14 @@ public class User extends Timestamped{
     @Column(nullable = false)
     private String password;
 
-    public User(String username, String password) {
+    @Column(nullable = false)
+    @Enumerated(value = EnumType.STRING)
+    private UserRoleEnum role;
+
+    public User(String username, String password, UserRoleEnum role) {
         this.username = username;
         this.password = password;
-    }
-    public User(UserRequestDto requestDto) {
-        this.username = requestDto.getUsername();
-        this.password = requestDto.getPassword();
+        this.role = role;
     }
 
 }
